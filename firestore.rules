@@ -1,0 +1,19 @@
+rules_version = '2';
+
+service cloud.firestore {
+  match /databases/{database}/documents {
+    
+    // Regras para a coleção de transações (transactions)
+    match /transactions/{transactionId} {
+      // Permite ler e atualizar/deletar se o usuário estiver autenticado e for o dono do documento
+      allow read, update, delete: if request.auth != null && request.auth.uid == resource.data.userId;
+      // Permite criar se o usuário estiver autenticado e o userId do novo documento coincidir com o uid dele
+      allow create: if request.auth != null && request.auth.uid == request.resource.data.userId;
+    }
+    
+    // Regras para a coleção de categorias (categories) onde o ID do documento é o próprio UID do usuário
+    match /categories/{userId} {
+      allow read, write: if request.auth != null && request.auth.uid == userId;
+    }
+  }
+}
